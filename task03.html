@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+    />
+    <script defer src="js/script.js"></script>
+    <title>Tic Tac Toe Game using HTML CSS & JS</title>
+  </head>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Ruda:wght@400;600;700&display=swap");
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --orangeColor: #f2c14e;
+  --darkColor: #2d414b;
+}
+
+body {
+  background: rgb(61, 99, 218);
+  background: radial-gradient(
+    circle,
+    rgba(61, 99, 218, 1) 0%,
+    rgba(214, 84, 207, 1) 55%,
+    rgba(151, 156, 203, 1) 100%
+  );
+  font-family: "poppins", sans-serif;
+  overflow-x: hidden;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  flex-direction: column;
+}
+
+.container h1 {
+  font-size: 3.5rem;
+  color: #fff;
+}
+
+#gameboard {
+  width: 650px;
+  padding: 2rem 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 5px;
+  position: relative;
+}
+
+.box {
+  height: 130px;
+  width: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--darkColor);
+  background-color: var(--orangeColor);
+  font-weight: 600;
+  font-size: 5.5rem;
+  margin: 0.5rem;
+  box-shadow: 2px 5px 5px #000;
+  border-radius: 5px;
+}
+
+.container.success .box {
+  cursor: not-allowed;
+}
+
+.modal {
+  position: absolute;
+  width: 650px;
+  height: 400px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 5px 10px 10px #000;
+  opacity: 0;
+  transform: translateX(500%);
+  transition: all 0.8s ease-in;
+}
+
+.container.success .modal {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height: 100%;
+}
+
+.content h2 {
+  font-size: 2.5rem;
+}
+
+button {
+  outline: none;
+  border: none;
+  padding: 0.8rem 4rem;
+  margin-top: 2rem;
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 1.2rem;
+  width: 320px;
+  cursor: pointer;
+  background-color: var(--orangeColor);
+  color: var(--darkColor);
+  font-weight: 600;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+  </style>
+  <body>
+    <div class="container">
+      <h1>Tic Tac Toe</h1>
+      <div id="gameboard">
+        <div class="box" id="0"></div>
+        <div class="box" id="1"></div>
+        <div class="box" id="2"></div>
+        <div class="box" id="3"></div>
+        <div class="box" id="4"></div>
+        <div class="box" id="5"></div>
+        <div class="box" id="6"></div>
+        <div class="box" id="7"></div>
+        <div class="box" id="8"></div>
+
+        <div class="modal">
+          <div class="content">
+            <h2 class="message">Congtratulation Player X</h2>
+            <p>You've Won the Game :)</p>
+            <button id="restartbtn">Restart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>"use strict";
+
+const ContainerEl = document.querySelector(".container");
+let playerTxt = document.querySelector(".message");
+let restartBtn = document.getElementById("restartbtn");
+let boxes = document.querySelectorAll(".box");
+
+const O_TXT = "O";
+const X_TXT = "X";
+
+let currentPlayer = O_TXT;
+let spaces = Array(9).fill(null);
+
+let winnnerIdicator = getComputedStyle(document.body).getPropertyValue(
+  "--darkColor",
+);
+
+// start Game
+const startGame = () => {
+  boxes.forEach((boxs) => boxs.addEventListener("click", boxClicked));
+};
+
+// box cliekd
+function boxClicked(e) {
+  const id = e.target.id;
+
+  // check id
+  if (!spaces[id]) {
+    spaces[id] = currentPlayer;
+    e.target.innerText = currentPlayer;
+
+    // winner logic
+    if (playerHasWon() != false) {
+      playerTxt.innerHTML = ` <h2 class="message">Congtratulation Player ${currentPlayer}</h2>`;
+      winnnerIdicator = playerHasWon();
+
+      winnnerIdicator.map(
+        (box) => (boxes[box].style.backgroundColor = "#f4d03f"),
+      );
+
+      ContainerEl.classList.add("success");
+    }
+    currentPlayer = currentPlayer == X_TXT ? O_TXT : X_TXT;
+  }
+}
+
+// wining combination
+const winingCombination = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6],
+];
+
+//player win
+function playerHasWon() {
+  for (const condition of winingCombination) {
+    let [a, b, c] = condition;
+
+    if (spaces[a] && spaces[a] == spaces[b] && spaces[a] == spaces[c]) {
+      return [a, b, c];
+    }
+  }
+  return false;
+}
+
+// reset the game
+restartBtn.addEventListener("click", restartGame);
+
+function restartGame() {
+  spaces.fill(null);
+
+  boxes.forEach((box) => {
+    box.innerHTML = "";
+    box.style.backgroundColor = "";
+  });
+
+  playerTxt.innerHTML = "Tic Tac Toe";
+  currentPlayer = O_TXT;
+  ContainerEl.classList.remove("success");
+}
+
+startGame();</script>
+</html>
